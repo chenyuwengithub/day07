@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/axios-0.18.0.js"></script>
+<script type="text/javascript" src="js/vuejs-2.5.16.js"></script>
+</head>
+<body>
+<div id="app">
+账号：<input v-model="user.username" @blur="un"><span v-text="s1"></span><br>
+密码：<input v-model="user.password" @blur="pw"><span v-text="s2"></span><br>
+重复密码：<input v-model="user.repassword" @blur="repw"><span v-text="s3"></span><br>
+<input type="button" value="注册" @click="validateUser">
+
+</div>
+<script type="text/javascript">
+var app = new Vue({
+	el:"#app",
+	data:{
+		user:{
+			username:"",
+			password:"",
+			repassword:""
+		},
+		s1:"",
+		s2:"",
+		s3:""
+	},
+	methods:{
+		un(){
+			var un = this.user.username;
+			if(un.length>0){
+				// 该发送ajax
+				axios.get("findUsername.action?username="+un).then(function(res){
+					if(res.data==0){
+						app.s1="√";
+					}else{
+						app.s1="账号已存在！";
+					}
+				});
+			}else{
+				this.s1="账号长度不能为空！";
+			}
+		},
+		pw(){
+			var pw = this.user.password;
+			if(pw.length>0){
+				this.s2="√";
+			}else{
+				this.s2="密码长度不能为空";
+			}
+		},
+		repw(){
+			var repw = this.user.repassword;
+			var pw =  this.user.password;
+			if(pw==repw){
+				this.s3="√";
+			}else{
+				this.s3="两次密码必须一致";
+			}
+		},
+		validateUser(){
+			if(this.s1=="√"&&this.s2=="√"&&this.s3=="√"){
+				// 发送ajax将信息给后台，进行注册
+				axios.post("regist.action",this.user).then(function(res){
+					location.href="login.html";
+				});
+			}else{
+				alert("信息有误，请重新填写！");
+			}
+		}
+	}
+});
+</script>
+</body>
+</html>

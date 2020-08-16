@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/axios-0.18.0.js"></script>
+<script type="text/javascript" src="js/vuejs-2.5.16.js"></script>
+</head>
+<body>
+<div id="app">
+<div v-text="msg"></div>
+账号：<input v-model="user.username"><br>
+密码：<input v-model="user.password"><br>
+<input type="button" value="登陆" @click="login">
+<a href="regist.html">注册</a>
+
+</div>
+<script type="text/javascript">
+var app = new Vue({
+	el:"#app",
+	data:{
+		user:{},
+		msg:""
+	},
+	methods:{
+		login(){
+			// 登陆
+			axios.post("login.action",this.user).then(function(res){
+				if(res.data==0){
+					app.msg = "登陆失败！";
+				}else{
+					location.href="show.html";
+				}
+			});
+		}
+	}
+});
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/axios-0.18.0.js"></script>
+<script type="text/javascript" src="js/vuejs-2.5.16.js"></script>
+</head>
+<body>
+<div id="app">
+<a href="add.html">添加</a>
+<br>
+请输入姓名：<input v-model="employee.ename">
+请输入性别：<input v-model="employee.sex">
+请输入部门：
+<select v-model="employee.did">
+	<option value="0">--请选择--</option>
+	<option v-for="d in depts" :value="d.did">{{d.dname}}</option>
+</select><br>
+请输入编号范围：<input v-model="employee.startNum">--
+<input v-model="employee.endNum"><br>
+<input type="button" value="搜索" @click="jump(1)">
+<table border="1">
+<tr>
+	<td><input type="button" value="全选" @click="cAll">
+	<input type="button" value="全不选" @click="cnotAll"></td>
+	<td>编号</td>
+	<td>姓名</td>
+	<td>性别</td>
+	<td>爱好</td>
+	<td>生日</td>
+	<td>部门</td>
+	<td>操作</td>
+</tr>
+<tr v-for="e in page.list">
+	<td><input type="checkbox" :value="e.eid" v-model="ids"></td>
+	<td>{{e.eid}}</td>
+	<td>{{e.ename}}</td>
+	<td>{{e.sex}}</td>
+	<td>{{e.hobby}}</td>
+	<td>{{e.birthday}}</td>
+	<td>{{e.dept.dname}}</td>
+	<td>
+		<input type="button" @click="del(e.eid)" value="删除">
+		<a :href="'update.html?eid='+e.eid"><input type="button" value="修改"></a>
+	</td>
+</tr>
+
+</table>
+<input type="button" value="选中删除" @click="delAll">
+当前页码{{page.pageNum}}/总页码{{page.pages}}/总数据{{page.total}}<br>
+
+<input type="button" value="首页" @click="jump(page.firstPage)">
+<input type="button" value="上一页" @click="jump(page.prePage)">
+
+<input v-for="i in page.pages" type="button" :value="i" @click="jump(i)">
+
+
+<input type="button" value="下一页" @click="jump(page.nextPage)">
+<input type="button" value="尾页" @click="jump(page.lastPage)">
+
+</div>
+
+<script type="text/javascript">
+var app = new Vue({
+	el:"#app",
+	data:{
+		page:{},
+		employee:{
+			did:0
+		},
+		depts:[],
+		ids:[]
+	},
+	methods:{
+		findAll(){
+			this.jump(1);
+		},
+		del(eid){
+			axios.get("del.action?eid="+eid).then(function(response){
+				app.findAll();
+			});
+		},
+		jump(pn){
+			// 查询所有数据
+			axios.post("findAll.action",{pageNum:pn,employee:this.employee}).then(function(response){
+				app.page=response.data;
+			});
+		},
+		findDepts(){
+			// 进行ajax请求，去查找所有的部门
+			axios.get("findDepts.action").then(function(response){
+				app.depts=response.data;
+			});
+		},
+		cAll(){
+			// 获取到所有的id
+			var list = this.page.list;
+			for (var i = 0; i < list.length; i++) {
+				this.ids.push(list[i].eid);
+			}
+		
+		},
+		cnotAll(){
+			this.ids=new Array();
+		},
+		delAll(){
+			axios.post("delAll.action",this.ids).then(function(res){
+				app.findAll();
+			});
+		}
+	},
+	created(){
+		this.findAll();
+		this.findDepts();
+	}
+	
+});
+
+</script>
+
+</body>
+</html>

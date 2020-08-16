@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/axios-0.18.0.js"></script>
+<script type="text/javascript" src="js/vuejs-2.5.16.js"></script>
+</head>
+<body>
+
+<div id="app">
+<input type="hidden" v-model="employee.eid">
+姓名：<input v-model="employee.ename"><br>
+性别：
+<input type="radio" v-model="employee.sex" value="男" checked="checked">男
+<input type="radio" v-model="employee.sex" value="女">女<br>
+爱好：
+<input type="checkbox" v-model="employee.h" value="篮球">篮球
+<input type="checkbox" v-model="employee.h" value="足球">足球
+<input type="checkbox" v-model="employee.h" value="排球">排球<br>
+生日：
+<input v-model="employee.birthday"><br>
+部门：
+<select v-model="employee.did">
+	<option selected="selected" value="0">--请选择--</option>
+	<option v-for="d in depts" :value="d.did">{{d.dname}}</option>
+</select><br>
+<input type="button" value="修改" @click="add">
+</div>
+<script type="text/javascript">
+// html之间的传值
+var eid = location.search.substring(5);
+
+var app = new Vue({
+	el:"#app",
+	data:{
+		employee:{
+			sex:"男",
+			did:0,
+			h:[]
+		},
+		depts:[]
+	},
+	methods:{
+		findByid(){
+			axios.get("findByid.action?eid="+eid).then(function(response){
+				app.employee = response.data;
+				app.employee.h = app.employee.hobby.split(",");
+			});
+		},
+		findDepts(){
+			// 进行ajax请求，去查找所有的部门
+			axios.get("findDepts.action").then(function(response){
+				app.depts=response.data;
+			});
+		},
+		add(){
+			// 因为实体类中用于存储爱好的是一个String字符串
+			// 那么我们传过去的数组，将不会被直接转化
+			var h = this.employee.h;
+			this.employee.hobby = h.join(",");
+			
+			axios.post("add.action",this.employee).then(function(response){
+				if(response.data==0){
+					location.href="show.html";
+				}
+			});
+		}
+	},
+	created(){
+		this.findDepts();
+		this.findByid();
+	}
+	
+});
+
+
+</script>
+</body>
+</html>
